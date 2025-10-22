@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Review Card Generator</title>
+    <!-- Libraries for Excel Parsing and Screenshot -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -52,7 +53,7 @@
             margin-top: 30px;
         }
 
-        /* Review Card Styling - Instagram 1:1 Square Resolution */
+        /* Review Card Styling - Fixed Dimensions (1:1 Aspect Ratio) */
         .review-card {
             width: 500px; 
             height: 500px; 
@@ -69,19 +70,18 @@
             transform: scale(1); 
         }
 
-        /* --- HEADER FIX: Increased Height and Centered Text --- */
+        /* --- Header: Fixed Position --- */
         .card-header {
             background-color: #10b981; 
             color: white;
             padding: 25px;
-            height: 160px; /* Tall header space */
+            height: 100px; /* Fixed height for header */
             display: flex;
             flex-direction: column;
             justify-content: center; 
             align-items: center; 
             box-sizing: border-box;
             position: relative;
-            z-index: 10; /* Set a high Z-index for the header itself */
         }
         
         .card-title {
@@ -91,31 +91,30 @@
             line-height: 1;
             margin: 0;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 12; /* Ensure title is above everything */
         }
 
         .card-subtitle {
             font-size: 1em;
             font-weight: 500;
             margin-top: 8px; 
-            position: relative;
-            z-index: 12; /* Ensure subtitle is above everything */
             opacity: 0.9;
         }
-        /* --- END HEADER FIX --- */
+        /* --- End Header --- */
 
+        /* --- Content Area: Fixed Position relative to header/footer --- */
         .card-content-area {
             background-color: white;
-            border-radius: 20px; 
-            margin: -60px 30px 0; /* Slightly lower the white area to expose more header */
+            border-radius: 20px 20px 0 0; 
+            /* CRITICAL: Adjusted margin to connect cleanly below the 100px header */
+            margin: -20px 30px 0; 
             padding: 20px 25px;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
             position: relative;
-            z-index: 5; /* Lower Z-index than header text */
+            z-index: 5;
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* Flex-grow allows this area to take all available space between header and footer */
             flex-grow: 1; 
             box-sizing: border-box;
         }
@@ -125,30 +124,33 @@
             height: 100px;
             border-radius: 50%;
             overflow: hidden;
-            margin-top: -60px; 
+            margin-top: 0;
+            margin-bottom: 15px; 
             border: 5px solid white; 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             position: relative; 
-            z-index: 15; /* Highest Z-index for the profile circle to overlap */
+            z-index: 10; 
         }
 
         .profile-section::before {
             content: '';
             position: absolute;
-            top: -8px; 
-            left: -8px;
-            right: -8px;
-            bottom: -8px;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
             border: 4px solid #10b981; 
             border-radius: 50%;
             z-index: -1;
         }
 
         .profile-pic { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        /* --- Feedback Section: Dynamic Content, Fixed Container Height --- */
         .feedback-section {
-            margin-top: 15px; text-align: left; position: relative; padding: 0 10px;
-            flex-grow: 1; display: flex; flex-direction: column; justify-content: center; 
-            max-height: 140px; overflow: hidden; 
+            margin-top: 10px;
+            text-align: left; position: relative; padding: 0 10px;
+            /* CRITICAL: Fixed height determined by layout needs */
+            height: 130px; 
+            display: flex; flex-direction: column; justify-content: center; 
+            overflow: hidden; 
         }
 
         .quote {
@@ -174,15 +176,17 @@
         .star-rating { display: flex; gap: 2px; }
         .star { color: #ffc107; font-size: 1.2em; }
 
-        /* --- FOOTER LAYOUT (Stacked and Aligned Icons) --- */
+        /* --- Footer: Fixed Position --- */
         .card-footer {
             background-color: #f0fdf4; 
             padding: 15px 25px;
+            height: 60px; /* Fixed height for footer */
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid #eee;
-            flex-wrap: nowrap;
+            flex-shrink: 0; /* Prevents shrinking */
+            box-sizing: border-box;
         }
 
         .footer-group {
@@ -192,27 +196,13 @@
             flex-basis: 33%; 
         }
         
-        .footer-right-group {
-            align-items: flex-end;
-        }
-        
-        .website-center {
-            display: flex;
-            justify-content: center;
-            flex-basis: 33%;
-            white-space: nowrap;
-        }
+        .footer-right-group { align-items: flex-end; }
+        .website-center { display: flex; justify-content: center; flex-basis: 33%; white-space: nowrap; }
 
         .social-link {
-            display: flex;
-            align-items: center; /* Aligns icon and text horizontally */
-            text-decoration: none;
-            color: #555;
-            font-size: 0.75em;
-            gap: 3px;
-            white-space: nowrap;
+            display: flex; align-items: center; text-decoration: none; color: #555;
+            font-size: 0.75em; gap: 3px; white-space: nowrap;
         }
-
         .social-link img { width: 16px; height: 16px; vertical-align: middle; }
         .website { font-size: 0.9em; font-weight: bold; color: #333; display: flex; align-items: center; gap: 5px; }
         .website img { width: 18px; height: 18px; vertical-align: middle; }
@@ -221,7 +211,7 @@
         @media (max-width: 600px) {
             .review-card { width: 100%; height: auto; max-width: 400px; }
             .button-group { flex-direction: column; }
-            .card-footer { flex-direction: column; gap: 10px; }
+            .card-footer { flex-direction: column; gap: 10px; height: auto; }
             .footer-group, .website-center { width: 100%; justify-content: center; align-items: center; }
             .footer-group { align-items: center; }
             .footer-right-group { align-items: center; }
@@ -244,9 +234,11 @@
         <p style="color:red; font-size: 0.8em; margin-top: 5px;">*Note: Google Drive images now use a proxy to bypass CORS issues, but files must still be publicly viewable.</p>
 
         <div id="reviewCardsContainer">
-            </div>
+            <!-- Cards will be rendered here for preview -->
+        </div>
     </div>
 
+    <!-- Hidden Template for Card Structure -->
     <template id="reviewCardTemplate">
         <div class="review-card">
             <div class="card-header">
@@ -272,15 +264,18 @@
                 </div>
             </div>
             <div class="card-footer">
+                <!-- Left Stacked Group (Facebook / YouTube) -->
                 <div class="footer-group footer-left-group">
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/facebook-new.png" alt="Facebook"> yrjournal</a>
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/youtube.png" alt="YouTube"> @yrjournal</a>
                 </div>
+                <!-- Center Website Link -->
                 <div class="website-center">
                     <div class="website">
                         <img src="https://img.icons8.com/ios-filled/24/000000/globe--v1.png" alt="Website"> yrjournal.org
                     </div>
                 </div>
+                <!-- Right Stacked Group (Instagram / LinkedIn) -->
                 <div class="footer-group footer-right-group">
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/instagram-new--v1.png" alt="Instagram"> youthrjournal</a>
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/linkedin.png" alt="LinkedIn"> company/yrj</a>
@@ -320,6 +315,7 @@
                 const maxAttempts = 10;
                 let attempts = 0;
 
+                // Use clientHeight for the fixed container size
                 while (feedbackElement.scrollHeight > containerElement.clientHeight && attempts < maxAttempts) {
                     fontSize -= 0.05;
                     if (fontSize < 0.6) {
