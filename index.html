@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Review Card Generator</title>
+    <title>Professional Review Card Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -78,9 +78,8 @@
 
         /* Review Card Styling - Instagram 1:1 Square Resolution */
         .review-card {
-            /* Fixed dimensions for consistent Instagram 1:1 Post resolution */
-            width: 500px; 
-            height: 500px;
+            width: 500px; /* Fixed width for consistent Instagram posts */
+            height: 500px; /* Fixed height for consistent Instagram posts */
             background-color: #f0fdf4; /* Default light green bottom */
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
@@ -90,20 +89,26 @@
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .card-header {
             background-color: #10b981; /* Green from the image */
             color: white;
-            padding: 20px 25px;
+            padding: 20px 25px; /* Adjust padding as needed */
             height: 120px; 
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Aligns content to the top */
-            align-items: flex-start; /* Aligns content to the left */
+            justify-content: center; /* Vertically center content */
+            align-items: flex-start; /* Align content to the left */
             box-sizing: border-box;
             position: relative;
             z-index: 1;
+            /* Background pattern from original image */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><circle cx="20" cy="20" r="10" fill="white"/><circle cx="80" cy="80" r="10" fill="white"/><circle cx="50" cy="50" r="10" fill="white"/></svg>'); /* Simplified placeholder */
+            background-size: 80px;
+            background-repeat: no-repeat;
+            background-position: center top;
         }
         
         /* Adjusted positioning for header text */
@@ -150,6 +155,7 @@
             border: 5px solid white; 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             position: relative; 
+            z-index: 11; /* Ensure it's above card-content-area shadow */
         }
 
         .profile-section::before {
@@ -176,10 +182,12 @@
             text-align: left;
             position: relative;
             padding: 0 10px;
-            flex-grow: 1; /* Allows feedback to take up available space */
+            flex-grow: 1; 
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center the text vertically */
+            justify-content: center; /* Vertically center the text */
+            max-height: 140px; /* Limit height for feedback area */
+            overflow: hidden; /* Hide overflow if font size reduction isn't enough */
         }
 
         .quote {
@@ -188,6 +196,7 @@
             color: #cccccc;
             font-family: serif;
             line-height: 0.6;
+            z-index: 0; /* Ensure quotes are behind text */
         }
 
         .quote-top {
@@ -202,11 +211,13 @@
         }
 
         .feedback-text {
-            font-size: 0.95em;
+            font-size: 0.95em; /* Default font size */
             line-height: 1.5;
             color: #444;
             margin: 15px 0;
             text-align: justify;
+            position: relative;
+            z-index: 1; /* Ensure text is above quotes */
         }
 
         .student-info-section {
@@ -251,14 +262,37 @@
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid #eee;
+            flex-wrap: wrap; /* Allow wrapping on very small screens for flexibility */
+            gap: 8px; /* Space between flex items */
         }
 
-        .social-links-group {
+        .footer-left-group, .footer-right-group {
             display: flex;
-            gap: 15px;
             align-items: center;
+            gap: 5px;
         }
 
+        .footer-left-group span {
+            font-size: 0.8em;
+            color: #555;
+            margin-right: 5px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #555;
+            font-size: 0.8em;
+            gap: 3px;
+            white-space: nowrap;
+        }
+
+        .social-link img {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
         .website {
             display: flex;
             align-items: center;
@@ -266,26 +300,24 @@
             font-weight: bold;
             color: #333;
             gap: 5px;
+            white-space: nowrap;
         }
 
-        .social-icon-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            background-color: #10b981;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        .website img {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
         }
 
-        .social-icon-box img {
-            filter: invert(100%); /* Make icons white for better contrast */
-            width: 16px;
-            height: 16px;
+        /* --- Custom Social Icons for Footer --- */
+        .footer-social-icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            filter: invert(0.2); /* Slightly darken default icons */
         }
 
-        /* Responsive Adjustments for UI controls, not the card itself */
+        /* Responsive Adjustments for UI controls */
         @media (max-width: 600px) {
             .review-card {
                 width: 100%;
@@ -296,8 +328,9 @@
                 flex-direction: column;
                 gap: 8px;
             }
-            .social-links-group {
-                gap: 10px;
+            .footer-left-group, .footer-right-group {
+                flex-direction: column;
+                gap: 5px;
             }
         }
     </style>
@@ -310,7 +343,7 @@
         
         <input type="file" id="excelFileInput" accept=".xlsx, .xls">
         <button id="generateCardsBtn" disabled>Generate & Download Review Cards (PNG)</button>
-        <p style="color:red; font-size: 0.8em; margin-top: 5px;">*Note: For Google Drive images, ensure the file is public. The script uses a proxy to fix CORS issues.</p>
+        <p style="color:red; font-size: 0.8em; margin-top: 5px;">*Note: Google Drive images now use a proxy to bypass CORS issues, but images must still be publicly viewable.</p>
 
         <div id="reviewCardsContainer">
             </div>
@@ -341,22 +374,17 @@
                 </div>
             </div>
             <div class="card-footer">
-                <div class="website">
-                    <img src="https://img.icons8.com/ios-filled/24/333333/globe--v1.png" alt="Website"> yrjournal.org
+                <div class="footer-left-group">
+                    <span>Find us on</span>
+                    <a href="#" class="social-link"><img class="footer-social-icon" src="https://img.icons8.com/ios-filled/50/000000/facebook-new.png" alt="Facebook"> yrjournal</a>
+                    <a href="#" class="social-link"><img class="footer-social-icon" src="https://img.icons8.com/ios-filled/50/000000/youtube.png" alt="YouTube"> @yrjournal</a>
                 </div>
-                <div class="social-links-group">
-                    <a href="#" class="social-icon-box" title="Facebook">
-                        <img src="https://img.icons8.com/ios-filled/50/FFFFFF/facebook-new.png" alt="Facebook">
-                    </a>
-                    <a href="#" class="social-icon-box" title="Instagram">
-                        <img src="https://img.icons8.com/ios-filled/50/FFFFFF/instagram-new--v1.png" alt="Instagram">
-                    </a>
-                    <a href="#" class="social-icon-box" title="LinkedIn">
-                        <img src="https://img.icons8.com/ios-filled/50/FFFFFF/linkedin.png" alt="LinkedIn">
-                    </a>
-                    <a href="#" class="social-icon-box" title="YouTube">
-                        <img src="https://img.icons8.com/ios-filled/50/FFFFFF/youtube.png" alt="YouTube">
-                    </a>
+                <div class="website">
+                    <img src="https://img.icons8.com/ios-filled/24/000000/globe--v1.png" alt="Website"> yrjournal.org
+                </div>
+                <div class="footer-right-group">
+                    <a href="#" class="social-link"><img class="footer-social-icon" src="https://img.icons8.com/ios-filled/50/000000/instagram-new--v1.png" alt="Instagram"> youthrjournal</a>
+                    <a href="#" class="social-link"><img class="footer-social-icon" src="https://img.icons8.com/ios-filled/50/000000/linkedin.png" alt="LinkedIn"> company/yrj</a>
                 </div>
             </div>
         </div>
@@ -371,31 +399,43 @@
 
             let studentData = [];
 
-            // --- Utility to fix Google Drive CORS issue ---
+            // --- Utility to fix Google Drive CORS issue using a public proxy ---
             function getFixedImageUrl(link) {
                 // Check if it's a Google Drive link
-                const driveRegex = /https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+                const driveRegex = /(https:\/\/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([a-zA-Z0-9_-]+))/;
                 const match = link.match(driveRegex);
                 
-                if (match && match[1]) {
-                    const fileId = match[1];
-                    // Use the direct download endpoint (which often works better for public links)
-                    // We use an external proxy (like the official Google one) to bypass CORS
-                    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                if (match && match[2]) {
+                    const fileId = match[2];
+                    // Use corsproxy.io to bypass CORS for Google Drive direct links
+                    // It's important that the Google Drive file is still publicly accessible.
+                    return `https://corsproxy.io/?https://drive.google.com/uc?export=view&id=${fileId}`;
                 }
-                // Also check for the old share link format
-                const shareRegex = /https:\/\/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/;
-                const shareMatch = link.match(shareRegex);
-                if (shareMatch && shareMatch[1]) {
-                    const fileId = shareMatch[1];
-                    return `https://drive.google.com/uc?export=view&id=${fileId}`;
-                }
-
                 // If it's a direct URL or not a GDrive link, return it as is
                 return link;
             }
             // ---------------------------------------------
 
+            // --- Function to adjust feedback font size ---
+            function adjustFeedbackFontSize(feedbackElement, containerElement) {
+                let fontSize = 0.95; // Starting font size in em
+                feedbackElement.style.fontSize = fontSize + 'em';
+                
+                const maxAttempts = 10; // Prevent infinite loops
+                let attempts = 0;
+
+                // Adjust font size until text fits or attempts run out
+                while (feedbackElement.scrollHeight > containerElement.clientHeight && attempts < maxAttempts) {
+                    fontSize -= 0.05; // Decrease by 0.05em
+                    if (fontSize < 0.6) { // Minimum font size to prevent unreadability
+                        fontSize = 0.6;
+                        break;
+                    }
+                    feedbackElement.style.fontSize = fontSize + 'em';
+                    attempts++;
+                }
+            }
+            // ---------------------------------------------
 
             excelFileInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
@@ -411,9 +451,7 @@
 
             generateCardsBtn.addEventListener('click', () => {
                 if (studentData.length > 0) {
-                    // 1. Generate cards so html2canvas can access them
                     generateReviewCards(studentData); 
-                    // 2. Download them sequentially
                     downloadAllCardsAsPng();
                 } else {
                     alert("Please upload an Excel file first.");
@@ -468,8 +506,17 @@
 
                     // Set a unique ID and hide card (to prevent flickering/layout shift)
                     card.id = `reviewCard_${index}`;
-                    card.style.display = 'none'; // Temporarily hide it
+                    card.style.visibility = 'hidden'; // Hide using visibility, which preserves layout for calculations
+                    card.style.position = 'absolute'; // Take it out of flow for calculation
+                    card.style.left = '-9999px';
+                    card.style.top = '-9999px';
                     reviewCardsContainer.appendChild(card);
+
+                    // Must append to DOM first for scrollHeight/clientHeight to be accurate
+                    // Then adjust font size
+                    const feedbackTextElement = card.querySelector('.feedback-text');
+                    const feedbackSectionElement = card.querySelector('.feedback-section');
+                    adjustFeedbackFontSize(feedbackTextElement, feedbackSectionElement);
                 });
             }
 
@@ -483,7 +530,7 @@
                     const cardElement = document.getElementById(`reviewCard_${i}`);
                     if (cardElement) {
                         // Prepare card for high-quality screenshot
-                        cardElement.style.display = 'block'; // Make visible
+                        cardElement.style.visibility = 'visible'; // Make visible for screenshot
                         cardElement.style.position = 'absolute';
                         cardElement.style.left = '-9999px';
                         cardElement.style.top = '-9999px';
@@ -496,7 +543,7 @@
                         await html2canvas(cardElement, {
                             scale: 2, // Double resolution (500*2 = 1000px)
                             useCORS: true, 
-                            allowTaint: true,
+                            allowTaint: true, // Needed due to proxy, but useCORS is primary
                             backgroundColor: null,
                             width: 500,
                             height: 500
@@ -509,11 +556,11 @@
                             link.click();
                         }).catch(error => {
                             console.error(`Error generating image for ${studentData[i]['Name']}:`, error);
-                            alert(`Failed to generate image for ${studentData[i]['Name']}. Check the browser console.`);
+                            alert(`Failed to generate image for ${studentData[i]['Name']}. Check the browser console. This can happen if image links are invalid or the proxy fails.`);
                         });
 
                         // Clean up styles
-                        cardElement.style.display = 'none';
+                        cardElement.style.visibility = 'hidden';
                         cardElement.style.position = '';
                         cardElement.style.left = '';
                         cardElement.style.top = '';
