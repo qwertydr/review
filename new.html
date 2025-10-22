@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Review Card Generator</title>
-    <!-- Libraries for Excel Parsing and Screenshot -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -31,57 +30,19 @@
             text-align: center;
         }
 
-        h1 {
-            color: #1a73e8;
-            margin-bottom: 10px;
-        }
-
-        p {
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        input[type="file"] {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+        h1 { color: #1a73e8; margin-bottom: 10px; }
+        p { margin-bottom: 15px; line-height: 1.5; }
+        input[type="file"] { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; }
         
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
+        .button-group { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; }
         .button-group button {
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            background-color: #1a73e8; color: white; border: none; padding: 12px 25px;
+            border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;
         }
-
-        .button-group .download-btn {
-            background-color: #28a745;
-        }
-
-        .button-group button:hover:not(:disabled) {
-            background-color: #145cb7;
-        }
-        .button-group .download-btn:hover:not(:disabled) {
-            background-color: #218838;
-        }
-
-        .button-group button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
+        .button-group .download-btn { background-color: #28a745; }
+        .button-group button:hover:not(:disabled) { background-color: #145cb7; }
+        .button-group .download-btn:hover:not(:disabled) { background-color: #218838; }
+        .button-group button:disabled { background-color: #cccccc; cursor: not-allowed; }
 
         #reviewCardsContainer {
             display: flex;
@@ -93,8 +54,8 @@
 
         /* Review Card Styling - Instagram 1:1 Square Resolution */
         .review-card {
-            width: 500px; /* Fixed width for consistent Instagram posts */
-            height: 500px; /* Fixed height for consistent Instagram posts */
+            width: 500px; 
+            height: 500px; 
             background-color: #f0fdf4; 
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
@@ -105,22 +66,21 @@
             flex-direction: column;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transform: scale(1); /* Ensure no scaling issues for screenshot */
+            transform: scale(1); 
         }
 
-        /* --- HEADER FIX: Fixed Top-Left Alignment --- */
+        /* --- HEADER FIX: Dedicated Space, No Overlap --- */
         .card-header {
             background-color: #10b981; 
             color: white;
-            padding: 25px; /* Increase padding for better look */
-            height: 120px; 
+            padding: 25px;
+            height: 100px; /* Sufficient height for text */
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Aligns content to the top */
-            align-items: flex-start; /* Aligns content to the left */
+            justify-content: center; 
+            align-items: center; 
             box-sizing: border-box;
             position: relative;
-            z-index: 1;
         }
         
         .card-title {
@@ -128,30 +88,26 @@
             font-weight: 800;
             letter-spacing: 2px;
             line-height: 1;
-            margin: 0; /* Remove default margin */
+            margin: 0;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 2;
         }
 
         .card-subtitle {
             font-size: 1em;
             font-weight: 500;
-            margin-top: 5px; /* Space from title */
-            position: relative;
-            z-index: 2;
+            margin-top: 8px; 
             opacity: 0.9;
         }
         /* --- END HEADER FIX --- */
 
         .card-content-area {
             background-color: white;
-            border-radius: 20px; 
-            margin: -50px 30px 0; 
+            border-radius: 20px 20px 0 0; /* Rounded top corners */
+            margin: -20px 30px 0; /* Slight negative margin to pull the top white area up to meet the green */
             padding: 20px 25px;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
             position: relative;
-            z-index: 10; 
+            z-index: 5;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -159,16 +115,18 @@
             box-sizing: border-box;
         }
 
+        /* --- IMAGE SECTION (Below Header Text) --- */
         .profile-section {
             width: 100px;
             height: 100px;
             border-radius: 50%;
             overflow: hidden;
-            margin-top: -60px; 
+            margin-top: 0; /* NO negative margin */
+            margin-bottom: 15px; /* Space before feedback */
             border: 5px solid white; 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             position: relative; 
-            z-index: 11;
+            z-index: 10; 
         }
 
         .profile-section::before {
@@ -182,79 +140,44 @@
             border-radius: 50%;
             z-index: -1;
         }
-        /* --- IMAGE RESPONSIVENESS FIX --- */
-        .profile-pic {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Ensures image fills the circle without distortion */
-            display: block;
-        }
-        /* --- END IMAGE RESPONSIVENESS FIX --- */
+
+        .profile-pic { width: 100%; height: 100%; object-fit: cover; display: block; }
 
         .feedback-section {
-            margin-top: 15px;
-            text-align: left;
-            position: relative;
-            padding: 0 10px;
-            flex-grow: 1; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-            max-height: 140px; 
+            margin-top: 10px; /* Reduced top margin */
+            text-align: left; position: relative; padding: 0 10px;
+            flex-grow: 1; display: flex; flex-direction: column; justify-content: center; 
+            max-height: 130px; /* Adjusted max height */
             overflow: hidden; 
         }
 
         .quote {
-            position: absolute;
-            font-size: 3.5em;
-            color: #cccccc;
-            font-family: serif;
-            line-height: 0.6;
-            z-index: 0; 
+            position: absolute; font-size: 3.5em; color: #cccccc; font-family: serif; line-height: 0.6; z-index: 0; 
         }
 
         .quote-top { top: -15px; left: 0; }
         .quote-bottom { bottom: -15px; right: 0; transform: rotate(180deg); }
 
         .feedback-text {
-            font-size: 0.95em; 
-            line-height: 1.5;
-            color: #444;
-            margin: 15px 0;
-            text-align: justify;
-            position: relative;
-            z-index: 1; 
+            font-size: 0.95em; line-height: 1.5; color: #444; margin: 15px 0;
+            text-align: justify; position: relative; z-index: 1; 
         }
 
         .student-info-section {
-            width: 100%;
-            text-align: left;
-            padding-left: 10px;
-            padding-top: 10px;
+            width: 100%; text-align: left; padding-left: 10px; padding-top: 10px;
         }
 
-        .student-name {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #333;
-            margin-bottom: 3px;
-        }
-
-        .student-school-class {
-            font-size: 0.85em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
+        .student-name { font-weight: bold; font-size: 1.1em; color: #333; margin-bottom: 3px; }
+        .student-school-class { font-size: 0.85em; color: #666; margin-bottom: 5px; }
         .student-class::before { content: ' | '; margin: 0 5px; }
 
         .star-rating { display: flex; gap: 2px; }
         .star { color: #ffc107; font-size: 1.2em; }
 
-        /* --- FOOTER REDESIGN FIX: Left, Center, Right --- */
+        /* --- FOOTER LAYOUT --- */
         .card-footer {
             background-color: #f0fdf4; 
-            padding: 15px 25px; /* Increased vertical padding */
+            padding: 15px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -264,75 +187,30 @@
 
         .footer-group {
             display: flex;
-            align-items: center;
-            gap: 15px;
-            /* Flex basis helps ensure equal spacing */
+            flex-direction: column; 
+            gap: 5px; 
             flex-basis: 33%; 
         }
-
-        .footer-left-group {
-            justify-content: flex-start;
-        }
-        .footer-right-group {
-            justify-content: flex-end;
-        }
-        .website-center {
-            display: flex;
-            justify-content: center;
-            flex-basis: 33%;
-        }
+        
+        .footer-right-group { align-items: flex-end; }
+        .website-center { display: flex; justify-content: center; flex-basis: 33%; white-space: nowrap; }
 
         .social-link {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: #555;
-            font-size: 0.75em; /* Smaller font for handles */
-            gap: 3px;
-            white-space: nowrap;
+            display: flex; align-items: center; text-decoration: none; color: #555;
+            font-size: 0.75em; gap: 3px; white-space: nowrap;
         }
-
-        .social-link img {
-            width: 16px;
-            height: 16px;
-            vertical-align: middle;
-        }
-
-        .website {
-            font-size: 0.9em;
-            font-weight: bold;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            white-space: nowrap;
-        }
-        .website img {
-            width: 18px;
-            height: 18px;
-            vertical-align: middle;
-        }
-        /* --- END FOOTER REDESIGN FIX --- */
-
+        .social-link img { width: 16px; height: 16px; vertical-align: middle; }
+        .website { font-size: 0.9em; font-weight: bold; color: #333; display: flex; align-items: center; gap: 5px; }
+        .website img { width: 18px; height: 18px; vertical-align: middle; }
 
         /* Responsive Adjustments for UI controls */
         @media (max-width: 600px) {
-            .review-card {
-                width: 100%;
-                height: auto; 
-                max-width: 400px;
-            }
-            .button-group {
-                flex-direction: column;
-            }
-            .card-footer {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .footer-group, .website-center {
-                width: 100%;
-                justify-content: center;
-            }
+            .review-card { width: 100%; height: auto; max-width: 400px; }
+            .button-group { flex-direction: column; }
+            .card-footer { flex-direction: column; gap: 10px; }
+            .footer-group, .website-center { width: 100%; justify-content: center; align-items: center; }
+            .footer-group { align-items: center; }
+            .footer-right-group { align-items: center; }
         }
     </style>
 </head>
@@ -352,11 +230,9 @@
         <p style="color:red; font-size: 0.8em; margin-top: 5px;">*Note: Google Drive images now use a proxy to bypass CORS issues, but files must still be publicly viewable.</p>
 
         <div id="reviewCardsContainer">
-            <!-- Cards will be rendered here for preview -->
-        </div>
+            </div>
     </div>
 
-    <!-- Hidden Template for Card Structure -->
     <template id="reviewCardTemplate">
         <div class="review-card">
             <div class="card-header">
@@ -411,32 +287,28 @@
 
             // --- Utility to fix Google Drive CORS issue using a public proxy ---
             function getFixedImageUrl(link) {
-                // Check if it's a Google Drive link
                 const driveRegex = /(https:\/\/(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([a-zA-Z0-9_-]+))/;
                 const match = link.match(driveRegex);
                 
                 if (match && match[2]) {
                     const fileId = match[2];
-                    // Using corsproxy.io to wrap the direct Google Drive link
                     return `https://corsproxy.io/?https://drive.google.com/uc?export=view&id=${fileId}`;
                 }
-                // If it's a direct URL or not a GDrive link, return it as is
                 return link;
             }
             // ---------------------------------------------
 
             // --- Function to dynamically adjust feedback font size ---
             function adjustFeedbackFontSize(feedbackElement, containerElement) {
-                let fontSize = 0.95; // Starting font size in em
+                let fontSize = 0.95; 
                 feedbackElement.style.fontSize = fontSize + 'em';
                 
                 const maxAttempts = 10;
                 let attempts = 0;
 
-                // Adjust font size until text fits or attempts run out
                 while (feedbackElement.scrollHeight > containerElement.clientHeight && attempts < maxAttempts) {
-                    fontSize -= 0.05; // Decrease by 0.05em
-                    if (fontSize < 0.6) { // Minimum font size
+                    fontSize -= 0.05;
+                    if (fontSize < 0.6) {
                         fontSize = 0.6;
                         break;
                     }
@@ -499,7 +371,7 @@
             }
 
             function generateReviewCards(data) {
-                reviewCardsContainer.innerHTML = ''; // Clear previous cards
+                reviewCardsContainer.innerHTML = ''; 
                 data.forEach((student, index) => {
                     const card = reviewCardTemplate.content.cloneNode(true).firstElementChild;
                     
@@ -524,7 +396,6 @@
                     }
 
                     card.id = `reviewCard_${index}`;
-                    // Temporarily hide the card from the flow while calculating font size
                     card.style.position = 'absolute'; 
                     card.style.visibility = 'hidden';
                     reviewCardsContainer.appendChild(card);
@@ -541,7 +412,6 @@
             }
 
             async function downloadAllCardsAsPng() {
-                // Get all generated cards
                 const cardsToDownload = Array.from(reviewCardsContainer.children);
                 if (cardsToDownload.length === 0) return;
 
@@ -552,7 +422,6 @@
                 for (let i = 0; i < cardsToDownload.length; i++) {
                     const cardElement = cardsToDownload[i];
                     
-                    // Temporarily move card off-screen and set fixed resolution for capture
                     cardElement.style.position = 'absolute';
                     cardElement.style.left = '-9999px';
                     cardElement.style.top = '-9999px';
@@ -560,9 +429,9 @@
                     cardElement.style.height = '500px'; 
                     
                     await html2canvas(cardElement, {
-                        scale: 2, // 1000px x 1000px resolution
+                        scale: 2,
                         useCORS: true, 
-                        allowTaint: false, // Set to false when using proxy
+                        allowTaint: false,
                         backgroundColor: null,
                         width: 500,
                         height: 500
@@ -574,11 +443,8 @@
                         link.click();
                     }).catch(error => {
                         console.error(`Error generating image for ${studentData[i]['Name']}:`, error);
-                        // Using a custom message box instead of alert()
-                        // Since custom modal is not requested, using console.error for debugging.
                     });
 
-                    // Restore card position for continued preview/download
                     cardElement.style.position = '';
                     cardElement.style.left = '';
                     cardElement.style.top = '';
