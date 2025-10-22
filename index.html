@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Card Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Review Card Generator</h1>
+        <p>Upload an Excel file (XLSX) with student reviews.</p>
+        <p>Columns should be: `Name`, `School`, `Class`, `Rating`, `Feedback`, `Image Link`.</p>
+        
+        <input type="file" id="excelFileInput" accept=".xlsx, .xls">
+        <button id="generateCardsBtn" disabled>Generate & Download Review Cards</button>
+
+        <div id="reviewCardsContainer">
+            </div>
+    </div>
+
+    <template id="reviewCardTemplate">
+        <div class="review-card">
+            <div class="card-header">
+                <div class="card-title">REVIEW</div>
+                <div class="card-subtitle">Summer Research Program 2025</div>
+            </div>
+            <div class="card-content-area">
+                <div class="profile-section">
+                    <img src="" alt="Profile Picture" class="profile-pic">
+                </div>
+                <div class="feedback-section">
+                    <div class="quote quote-top">“</div>
+                    <p class="feedback-text"></p>
+                    <div class="quote quote-bottom">”</div>
+                </div>
+                <div class="student-info-section">
+                    <div class="student-name"></div>
+                    <div class="student-school-class">
+                        <span class="student-school"></span>
+                        <span class="student-class"></span>
+                    </div>
+                    <div class="star-rating"></div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="social-icons">
+                    <span>Find us on</span>
+                    <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/20/000000/facebook-new.png" alt="Facebook"> yrjournal</a>
+                    <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/20/000000/youtube.png" alt="YouTube"> @yrjournal</a>
+                </div>
+                <div class="website">
+                    <img src="https://img.icons8.com/ios-filled/20/000000/globe--v1.png" alt="Website"> yrjournal.org
+                </div>
+                <div class="social-icons">
+                    <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/20/000000/instagram-new--v1.png" alt="Instagram"> youthrjournal</a>
+                    <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/20/000000/linkedin.png" alt="LinkedIn"> company/yrj</a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
