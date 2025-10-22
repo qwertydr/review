@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional Review Card Generator</title>
-    <!-- Libraries for Excel Parsing and Screenshot -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -36,18 +35,10 @@
         input[type="file"] { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; }
         
         .button-group { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; }
-
         .button-group button {
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
+            background-color: #1a73e8; color: white; border: none; padding: 12px 25px;
+            border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;
         }
-
         .button-group .download-btn { background-color: #28a745; }
         .button-group button:hover:not(:disabled) { background-color: #145cb7; }
         .button-group .download-btn:hover:not(:disabled) { background-color: #218838; }
@@ -83,14 +74,14 @@
             background-color: #10b981; 
             color: white;
             padding: 25px;
-            height: 160px; /* Increased Height for clear separation */
+            height: 160px; /* Tall header space */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* Center content vertically in the header */
-            align-items: center; /* Center content horizontally */
+            justify-content: center; 
+            align-items: center; 
             box-sizing: border-box;
             position: relative;
-            z-index: 1;
+            z-index: 10; /* Set a high Z-index for the header itself */
         }
         
         .card-title {
@@ -101,7 +92,7 @@
             margin: 0;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
             position: relative;
-            z-index: 2;
+            z-index: 12; /* Ensure title is above everything */
         }
 
         .card-subtitle {
@@ -109,7 +100,7 @@
             font-weight: 500;
             margin-top: 8px; 
             position: relative;
-            z-index: 2;
+            z-index: 12; /* Ensure subtitle is above everything */
             opacity: 0.9;
         }
         /* --- END HEADER FIX --- */
@@ -117,11 +108,11 @@
         .card-content-area {
             background-color: white;
             border-radius: 20px; 
-            margin: -70px 30px 0; /* Adjusted negative margin to match new header height overlap (160px - 90px base height) */
+            margin: -60px 30px 0; /* Slightly lower the white area to expose more header */
             padding: 20px 25px;
             box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
             position: relative;
-            z-index: 10; 
+            z-index: 5; /* Lower Z-index than header text */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -134,11 +125,11 @@
             height: 100px;
             border-radius: 50%;
             overflow: hidden;
-            margin-top: -60px; /* Pulls image up into the new white overlap area */
+            margin-top: -60px; 
             border: 5px solid white; 
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             position: relative; 
-            z-index: 11;
+            z-index: 15; /* Highest Z-index for the profile circle to overlap */
         }
 
         .profile-section::before {
@@ -153,53 +144,27 @@
             z-index: -1;
         }
 
-        .profile-pic {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            display: block;
-        }
-
+        .profile-pic { width: 100%; height: 100%; object-fit: cover; display: block; }
         .feedback-section {
-            margin-top: 15px;
-            text-align: left;
-            position: relative;
-            padding: 0 10px;
-            flex-grow: 1; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-            max-height: 140px; 
-            overflow: hidden; 
+            margin-top: 15px; text-align: left; position: relative; padding: 0 10px;
+            flex-grow: 1; display: flex; flex-direction: column; justify-content: center; 
+            max-height: 140px; overflow: hidden; 
         }
 
         .quote {
-            position: absolute;
-            font-size: 3.5em;
-            color: #cccccc;
-            font-family: serif;
-            line-height: 0.6;
-            z-index: 0; 
+            position: absolute; font-size: 3.5em; color: #cccccc; font-family: serif; line-height: 0.6; z-index: 0; 
         }
 
         .quote-top { top: -15px; left: 0; }
         .quote-bottom { bottom: -15px; right: 0; transform: rotate(180deg); }
 
         .feedback-text {
-            font-size: 0.95em; 
-            line-height: 1.5;
-            color: #444;
-            margin: 15px 0;
-            text-align: justify;
-            position: relative;
-            z-index: 1; 
+            font-size: 0.95em; line-height: 1.5; color: #444; margin: 15px 0;
+            text-align: justify; position: relative; z-index: 1; 
         }
 
         .student-info-section {
-            width: 100%;
-            text-align: left;
-            padding-left: 10px;
-            padding-top: 10px;
+            width: 100%; text-align: left; padding-left: 10px; padding-top: 10px;
         }
 
         .student-name { font-weight: bold; font-size: 1.1em; color: #333; margin-bottom: 3px; }
@@ -209,7 +174,7 @@
         .star-rating { display: flex; gap: 2px; }
         .star { color: #ffc107; font-size: 1.2em; }
 
-        /* --- FOOTER FIX: Stacked and Aligned Icons --- */
+        /* --- FOOTER LAYOUT (Stacked and Aligned Icons) --- */
         .card-footer {
             background-color: #f0fdf4; 
             padding: 15px 25px;
@@ -222,13 +187,13 @@
 
         .footer-group {
             display: flex;
-            flex-direction: column; /* Stacks links vertically (Facebook/YouTube) */
-            gap: 5px; /* Space between stacked links */
+            flex-direction: column; 
+            gap: 5px; 
             flex-basis: 33%; 
         }
         
         .footer-right-group {
-            align-items: flex-end; /* Align the stacked group to the right */
+            align-items: flex-end;
         }
         
         .website-center {
@@ -240,7 +205,7 @@
 
         .social-link {
             display: flex;
-            align-items: center; /* CRITICAL: Aligns icon and text horizontally */
+            align-items: center; /* Aligns icon and text horizontally */
             text-decoration: none;
             color: #555;
             font-size: 0.75em;
@@ -248,41 +213,16 @@
             white-space: nowrap;
         }
 
-        .social-link img {
-            width: 16px;
-            height: 16px;
-            vertical-align: middle;
-        }
-
-        .website {
-            font-size: 0.9em;
-            font-weight: bold;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .website img {
-            width: 18px;
-            height: 18px;
-            vertical-align: middle;
-        }
-        /* --- END FOOTER FIX --- */
+        .social-link img { width: 16px; height: 16px; vertical-align: middle; }
+        .website { font-size: 0.9em; font-weight: bold; color: #333; display: flex; align-items: center; gap: 5px; }
+        .website img { width: 18px; height: 18px; vertical-align: middle; }
 
         /* Responsive Adjustments for UI controls */
         @media (max-width: 600px) {
-            .review-card {
-                width: 100%;
-                height: auto; 
-                max-width: 400px;
-            }
+            .review-card { width: 100%; height: auto; max-width: 400px; }
             .button-group { flex-direction: column; }
             .card-footer { flex-direction: column; gap: 10px; }
-            .footer-group, .website-center {
-                width: 100%;
-                justify-content: center;
-                align-items: center;
-            }
+            .footer-group, .website-center { width: 100%; justify-content: center; align-items: center; }
             .footer-group { align-items: center; }
             .footer-right-group { align-items: center; }
         }
@@ -304,11 +244,9 @@
         <p style="color:red; font-size: 0.8em; margin-top: 5px;">*Note: Google Drive images now use a proxy to bypass CORS issues, but files must still be publicly viewable.</p>
 
         <div id="reviewCardsContainer">
-            <!-- Cards will be rendered here for preview -->
-        </div>
+            </div>
     </div>
 
-    <!-- Hidden Template for Card Structure -->
     <template id="reviewCardTemplate">
         <div class="review-card">
             <div class="card-header">
@@ -320,7 +258,6 @@
                     <img src="" alt="Profile Picture" class="profile-pic">
                 </div>
                 <div class="feedback-section">
-                    <!-- Quotes are already placed in the template -->
                     <div class="quote quote-top">“</div>
                     <p class="feedback-text"></p>
                     <div class="quote quote-bottom">”</div>
@@ -335,18 +272,15 @@
                 </div>
             </div>
             <div class="card-footer">
-                <!-- Left Stacked Group (Facebook / YouTube) -->
                 <div class="footer-group footer-left-group">
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/facebook-new.png" alt="Facebook"> yrjournal</a>
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/youtube.png" alt="YouTube"> @yrjournal</a>
                 </div>
-                <!-- Center Website Link -->
                 <div class="website-center">
                     <div class="website">
                         <img src="https://img.icons8.com/ios-filled/24/000000/globe--v1.png" alt="Website"> yrjournal.org
                     </div>
                 </div>
-                <!-- Right Stacked Group (Instagram / LinkedIn) -->
                 <div class="footer-group footer-right-group">
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/instagram-new--v1.png" alt="Instagram"> youthrjournal</a>
                     <a href="#" class="social-link"><img src="https://img.icons8.com/ios-filled/50/000000/linkedin.png" alt="LinkedIn"> company/yrj</a>
@@ -372,7 +306,6 @@
                 
                 if (match && match[2]) {
                     const fileId = match[2];
-                    // Using corsproxy.io to wrap the direct Google Drive link
                     return `https://corsproxy.io/?https://drive.google.com/uc?export=view&id=${fileId}`;
                 }
                 return link;
