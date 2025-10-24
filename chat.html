@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Review Card Generator — 1080x1080 Export</title>
+
+  <!-- libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root{
+      --preview-size: 360px; /* visible preview size in UI */
+      --export-size: 1080px; /* final exported pixel size */
+      --card-radius: 24px;
+      --brand: #10b981;
+      --accent: #1a73e8;
+      --bg: #f0f2f5;
+      --text: #222;
+      --muted: #666;
+    }
+
+    /* PAGE */
+    body{
+      margin:0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container{
+      background: #fff;
+      width:100%;
+      max-width:1100px;
+      padding: 24px;
+      border-radius:12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+
+    h1{ margin:0 0 6px 0; color:var(--accent); }
+    p.lead{ margin:8px 0 18px 0; color:#444; font-size:0.95rem; }
+
+    input[type=file]{ padding:10px; border-radius:8px; border:1px solid #ddd; }
+
+    .button-group{ display:flex; gap:12px; margin:14px 0 8px; flex-wrap:wrap; }
+    .btn{
+      border: none; cursor:pointer; padding:10px 16px; border-radius:8px;
+      background: var(--accent); color:white; font-weight:600;
+      transition:transform .08s ease, filter .08s;
+    }
+    .btn:active{ transform:translateY(1px); }
+    .btn.secondary{ background:#28a745; }
+    .btn[disabled]{ background:#cfcfcf; cursor:not-allowed; }
+
+    /* cards container */
+    #reviewCardsContainer{ display:flex; flex-wrap:wrap; gap:18px; margin-top:18px; justify-content:center; }
+
+    /* REVIEW CARD (preview) - uses transform scale for crisp export */
+    .review-card{
+      width: var(--preview-size);
+      height: var(--preview-size);
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 26px rgba(0,0,0,0.12);
+      overflow: hidden;
+      background: linear-gradient(180deg,#f0fdf4 0%, #ffffff 40%);
+      position: relative;
+      box-sizing: border-box;
+      display:block;
+      /* set relative to position absolute internal parts */
+      font-family: inherit;
+    }
+
+    /* Use inner container sized to 100% to allow swapping width/height at export time */
+    .card-inner{
+      position: absolute;
+      inset:0;
+      display:block;
+      /* define layout grid: header - content - footer */
+      display:grid;
+      grid-template-rows: 18% 64% 18%; /* header / content / footer percentages */
+      background: transparent;
+    }
+
+    /* Header - fixed position (top) */
+    .card-header{
+      background: var(--brand);
+      color: #fff;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:12px 18px;
+      box-sizing:border-box;
+      text-align:center;
+    }
+    .card-title{ font-size: clamp(14px, 2.2vw, 28px); font-weight:800; letter-spacing:1px; margin:0;}
+    .card-subtitle{ font-size: clamp(10px, 1.2vw, 14px); opacity:0.95; margin-top:6px; font-weight:600; }
+
+    /* Content block */
+    .card-body{
+      position:relative;
+      padding:12px 18px;
+      background: white;
+      margin: -18px 18px 0 18px; /* lifted white area to meet header */
+      border-radius: 18px 18px 0 0;
+      box-shadow: 0 -6px 18px rgba(0,0,0,0.06);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      box-sizing:border-box;
+      gap:8px;
+    }
+
+    /* profile image circle fixed position inside content */
+    .profile-section{
+      width: 22%;            /* percentage of card width */
+      aspect-ratio: 1/1;
+      min-width:64px;
+      max-width:120px;
+      border-radius:50%;
+      overflow:hidden;
+      border:6px solid #fff;
+      display:block;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      position: relative;
+      z-index:6;
+      background:#eee;
+    }
+    .profile-section img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* Feedback area - fixed box that will auto-scale its text */
+    .feedback-wrapper{
+      width:100%;
+      flex:1 1 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      box-sizing:border-box;
+      padding:6px 8px;
+      overflow:hidden;
+    }
+
+    .feedback-box{
+      width:100%;
+      height:100%;
+      max-height: calc(100% - 8px);
+      position:relative;
+      box-sizing:border-box;
+      padding:8px 6px;
+    }
+
+    .quote { position:absolute; font-family:serif; color:#e6e6e6; font-size:48px; z-index:0; user-select:none; pointer-events:none; }
+    .quote.top{ left:4px; top:-6px; transform:scale(1); opacity:0.95; }
+    .quote.bottom{ right:6px; bottom:-6px; transform:rotate(180deg); opacity:0.95; }
+
+    .feedback-text{
+      position:relative;
+      z-index:2;
+      margin:0;
+      line-height:1.4;
+      text-align:justify;
+      color:#333;
+      overflow:hidden;
+      /* start font-size; will be adjusted with JS to fit the box */
+      font-size:1rem;
+    }
+
+    /* student info area (fixed) */
+    .student-info{
+      width:100%;
+      padding-top:8px;
+      box-sizing:border-box;
+      text-align:left;
+    }
+    .student-name{ font-weight:700; font-size:1rem; color:#111; margin-bottom:4px; }
+    .student-school-class{ font-size:0.85rem; color:var(--muted); display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .star-rating{ display:flex; gap:3px; margin-top:6px; }
+
+    .star{ font-size:1.05rem; color:#ffc107; }
+
+    /* Footer - fixed (bottom) */
+    .card-footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 16px;
+      box-sizing:border-box;
+      gap:6px;
+      background: transparent;
+      color:#444;
+    }
+
+    .footer-group{ display:flex; flex-direction:column; gap:6px; font-size:0.82rem; white-space:nowrap; }
+    .social-link{ display:inline-flex; gap:8px; align-items:center; text-decoration:none; color:inherit; }
+    .website{ display:flex; align-items:center; font-weight:700; gap:8px; white-space:nowrap; }
+
+    /* Responsive small screens: keep preview smaller */
+    @media (max-width:580px){
+      :root{ --preview-size: 300px; }
+      .container{ padding:18px; }
+      .card-title{ font-size:16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Professional Review Card Generator</h1>
+    <p class="lead">Upload an Excel (.xlsx) file with columns: <code>Name</code>, <code>School</code>, <code>Class</code>, <code>Rating</code>, <code>Feedback</code>, <code>Image Link</code>.</p>
+
+    <input id="excelFileInput" type="file" accept=".xlsx, .xls" />
+    <div class="button-group">
+      <button id="previewCardsBtn" class="btn" disabled>1. Preview Review Cards</button>
+      <button id="downloadCardsBtn" class="btn secondary" disabled>2. Download All as PNG</button>
+    </div>
+    <p style="color: #b33; font-size:0.85rem; margin-top:8px;">*Note: Google Drive direct links are proxied to avoid CORS but must be publicly viewable.</p>
+
+    <div id="reviewCardsContainer" aria-live="polite"></div>
+  </div>
+
+  <!-- Template -->
+  <template id="reviewCardTemplate">
+    <div class="review-card" role="article" aria-label="Review card">
+      <div class="card-inner">
+        <div class="card-header">
+          <div class="card-title">REVIEW</div>
+          <div class="card-subtitle">Summer Research Program 2025</div>
+        </div>
+
+        <div class="card-body">
+          <div class="profile-section">
+            <img class="profile-pic" src="" alt="profile"/>
+          </div>
+
+          <div class="feedback-wrapper" aria-hidden="false">
+            <div class="feedback-box">
+              <div class="quote top">“</div>
+              <p class="feedback-text"></p>
+              <div class="quote bottom">”</div>
+            </div>
+          </div>
+
+          <div class="student-info">
+            <div class="student-name"></div>
+            <div class="student-school-class">
+              <span class="student-school"></span>
+              <span class="student-class"></span>
+            </div>
+            <div class="star-rating" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="footer-group footer-left-group">
+            <a class="social-link" href="#" target="_blank" rel="noreferrer"><img src="https://img.icons8.com/ios-filled/24/000000/facebook-new.png" width="16" alt="FB"> yrjournal</a>
+            <a class="social-link" href="#" target="_blank" rel="noreferrer"><img src="https://img.icons8.com/ios-filled/24/000000/youtube.png" width="16" alt="YT">@yrjournal</a>
+          </div>
+
+          <div class="website"><img src="https://img.icons8.com/ios-filled/24/000000/globe--v1.png" width="16" alt="web"> yrjournal.org</div>
+
+          <div class="footer-group footer-right-group">
+            <a class="social-link" href="#" target="_blank" rel="noreferrer"><img src="https://img.icons8.com/ios-filled/24/000000/instagram-new--v1.png" width="16" alt="IG"> youthrjournal</a>
+            <a class="social-link" href="#" target="_blank" rel="noreferrer"><img src="https://img.icons8.com/ios-filled/24/000000/linkedin.png" width="16" alt="LI"> company/yrj</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const excelFileInput = document.getElementById('excelFileInput');
+      const previewCardsBtn = document.getElementById('previewCardsBtn');
+      const downloadCardsBtn = document.getElementById('downloadCardsBtn');
+      const reviewCardsContainer = document.getElementById('reviewCardsContainer');
+      const reviewCardTemplate = document.getElementById('reviewCardTemplate');
+
+      let studentData = [];
+
+      /* Proxy fix for Google Drive links */
+      function getFixedImageUrl(link){
+        if(!link) return '';
+        const driveRegex = /(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs.google.com\/uc\?id=)([a-zA-Z0-9_-]{10,})/;
+        const match = link.match(driveRegex);
+        if(match && match[1]){
+          const id = match[1];
+          return `https://corsproxy.io/?https://drive.google.com/uc?export=view&id=${id}`;
+        }
+        // if it's already a proxied or direct link, return it
+        return link;
+      }
+
+      /* Adjust feedback text size to fit in its box while keeping layout fixed */
+      function adjustFeedbackFontSize(feedbackEl, boxEl){
+        if(!feedbackEl || !boxEl) return;
+        // start from computed default
+        let computed = window.getComputedStyle(feedbackEl).fontSize;
+        let fontSize = parseFloat(computed) || 16;
+        // we'll shrink stepwise until it fits
+        const min = 10; // px
+        const step = 0.9; // multiply factor per iteration
+        // Reset to initial large size (in case of previous resizing)
+        feedbackEl.style.fontSize = fontSize + 'px';
+        feedbackEl.style.lineHeight = '1.4';
+        // allow short-circuit if it already fits
+        let attempts = 0;
+        while ((feedbackEl.scrollHeight > boxEl.clientHeight || feedbackEl.scrollWidth > boxEl.clientWidth) && attempts < 20 && fontSize > min) {
+          fontSize = Math.max(min, Math.floor(fontSize * step));
+          feedbackEl.style.fontSize = fontSize + 'px';
+          attempts++;
+        }
+        // If still overflowing, hide overflow (ellipsis not used because text is justified)
+        feedbackEl.style.overflow = 'hidden';
+      }
+
+      excelFileInput.addEventListener('change', (e)=>{
+        const file = e.target.files[0];
+        if(!file){
+          studentData = [];
+          previewCardsBtn.disabled = true;
+          downloadCardsBtn.disabled = true;
+          reviewCardsContainer.innerHTML = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = new Uint8Array(ev.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[firstName];
+            studentData = XLSX.utils.sheet_to_json(sheet);
+            const required = ['Name','School','Class','Rating','Feedback','Image Link'];
+            const missing = required.filter(c => !studentData[0] || !(c in studentData[0]));
+            if(missing.length){
+              alert('Missing required columns: ' + missing.join(', '));
+              studentData = [];
+              previewCardsBtn.disabled = true;
+              return;
+            }
+            previewCardsBtn.disabled = false;
+          } catch (err){
+            console.error(err);
+            alert('Failed to read the Excel file.');
+            studentData = [];
+            previewCardsBtn.disabled = true;
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+
+      previewCardsBtn.addEventListener('click', () => {
+        if(!studentData || !studentData.length){
+          alert('Please upload a proper Excel file first.');
+          return;
+        }
+        generateReviewCards(studentData);
+        downloadCardsBtn.disabled = false;
+      });
+
+      function generateReviewCards(data){
+        reviewCardsContainer.innerHTML = '';
+        data.forEach((student, i) => {
+          const frag = reviewCardTemplate.content.cloneNode(true);
+          const card = frag.querySelector('.review-card');
+          const pic = card.querySelector('.profile-pic');
+          const feedbackText = card.querySelector('.feedback-text');
+          const nameEl = card.querySelector('.student-name');
+          const schoolEl = card.querySelector('.student-school');
+          const classEl = card.querySelector('.student-class');
+          const starContainer = card.querySelector('.star-rating');
+          const feedbackBox = card.querySelector('.feedback-box');
+
+          // set data
+          const imageUrl = getFixedImageUrl(student['Image Link'] || '');
+          pic.src = imageUrl || 'https://via.placeholder.com/300/E0E0E0/808080?text=NO+IMG';
+          pic.alt = (student['Name'] || 'Student') + ' profile';
+
+          feedbackText.textContent = student['Feedback'] || '';
+          nameEl.textContent = student['Name'] || '';
+          schoolEl.textContent = student['School'] || '';
+          classEl.textContent = student['Class'] || '';
+
+          // rating
+          starContainer.innerHTML = '';
+          let rating = parseInt(student['Rating']);
+          if(isNaN(rating)) rating = 0;
+          rating = Math.max(0, Math.min(5, rating));
+          for(let k=0;k<5;k++){
+            const s = document.createElement('span');
+            s.className = 'star';
+            s.innerHTML = k < rating ? '&#9733;' : '&#9734;';
+            starContainer.appendChild(s);
+          }
+
+          // ensure structure is visible so measurement works
+          reviewCardsContainer.appendChild(card);
+
+          // After appended, adjust font size to fit the feedback-box
+          // Use computed pixel size for accurate fitting
+          adjustFeedbackFontSize(feedbackText, feedbackBox);
+
+          // keep card accessible id
+          card.dataset.index = i;
+        });
+      }
+
+      /* DOWNLOAD: export full resolution 1080x1080 PNGs one-by-one */
+      downloadCardsBtn.addEventListener('click', async () => {
+        const cards = Array.from(reviewCardsContainer.children);
+        if(cards.length === 0){
+          alert('No cards to download. Please preview first.');
+          return;
+        }
+
+        downloadCardsBtn.disabled = true;
+        previewCardsBtn.disabled = true;
+        downloadCardsBtn.textContent = 'Generating...';
+
+        for(let i=0;i<cards.length;i++){
+          const card = cards[i];
+
+          // create a clone to export to avoid reflowing the visible preview
+          const clone = card.cloneNode(true);
+          // Put clone off-screen
+          clone.style.position = 'absolute';
+          clone.style.left = '-99999px';
+          clone.style.top = '-99999px';
+          // Set to export size (1080x1080)
+          clone.style.width = getComputedStyle(document.documentElement).getPropertyValue('--export-size') || '1080px';
+          clone.style.height = getComputedStyle(document.documentElement).getPropertyValue('--export-size') || '1080px';
+          // ensure inner child fills it
+          clone.querySelector('.card-inner').style.width = '100%';
+          clone.querySelector('.card-inner').style.height = '100%';
+          // If the feedback text in the clone needs resizing for export, do it:
+          const feedbackText = clone.querySelector('.feedback-text');
+          const feedbackBox = clone.querySelector('.feedback-box');
+          // Put clone in DOM temporarily
+          document.body.appendChild(clone);
+          // For export, compute a suitable starting font-size larger than preview, then shrink to fit
+          // Start from 28px and shrink
+          feedbackText.style.fontSize = '28px';
+          // call adjustFeedbackFontSize for clone
+          adjustFeedbackFontSize(feedbackText, feedbackBox);
+
+          try {
+            // html2canvas render at exact dimensions (no extra scale)
+            const canvas = await html2canvas(clone, {
+              scale: 1,
+              useCORS: true,
+              allowTaint: false,
+              backgroundColor: null,
+              width: parseInt(getComputedStyle(clone).width),
+              height: parseInt(getComputedStyle(clone).height)
+            });
+            // Create download link
+            const link = document.createElement('a');
+            const safeName = (studentData[i] && studentData[i]['Name'] ? studentData[i]['Name'] : `review_${i}`).replace(/[^a-z0-9_\-]/gi,'_').substring(0, 50);
+            link.download = `${safeName}_IG_1080.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          } catch (err){
+            console.error('Export error for card', i, err);
+            alert('Error generating card image for: ' + (studentData[i] && studentData[i]['Name'] ? studentData[i]['Name'] : `#${i}`));
+          } finally {
+            // remove clone
+            clone.remove();
+          }
+        }
+
+        downloadCardsBtn.disabled = false;
+        previewCardsBtn.disabled = false;
+        downloadCardsBtn.textContent = '2. Download All as PNG';
+        alert('All review cards have been exported as 1080×1080 PNGs.');
+      });
+
+    }); // DOMContentLoaded
+  </script>
+</body>
+</html>
